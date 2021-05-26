@@ -3,8 +3,15 @@ import './App.css';
 import React from 'react';
 
 const App = () => {
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchTerm, setSearchTerm] = React.useState(localStorage.getItem('search') || 'React');
 
+  /**
+   * This React Hook is basically saying that whenever, wherever, searchTerm is updated through
+   * setSearchTerm, localStorage will always be in sync
+   */
+  React.useEffect(() => { // Is called when component renders for the first time
+    localStorage.setItem('search', searchTerm);
+  }, [searchTerm]); // Array of variables to be watched, calling this function when they change
 
   const stories = [
     {
@@ -27,6 +34,7 @@ const App = () => {
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
+    localStorage.setItem('search', event.target.value);
   }
 
   return (
@@ -43,7 +51,7 @@ const App = () => {
 
 
 const Search = (props) => {
-  
+
   return (
     <div>
       <label htmlFor="search">Search:</label>
