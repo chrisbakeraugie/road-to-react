@@ -51,10 +51,11 @@ const App = () => {
 
       <InputWithLabel
         id="search"
-        label="Search"
         value={searchTerm}
         onInputChange={handleSearch}
-      />
+      >
+        <strong>Search:</strong>
+      </InputWithLabel>
       <hr />
       <List list={searchedStories} />
     </div>
@@ -62,14 +63,9 @@ const App = () => {
 }
 
 
-const InputWithLabel = ({ id, label, value, type = 'text', onInputChange }) => ( // We can give the default value for type, but it can still be changed from outside
-  // <>
-  // ... all the jsx here
-  // </>
-  // Fragments will work but they also ruin the formatting on 
-  // VSCode, so for now I won't be using them
+const InputWithLabel = ({ id, value, type = 'text', onInputChange, children }) => ( // We can give the default value for type, but it can still be changed from outside
   <div>
-    <label htmlFor={id}>{label}</label>
+    <label htmlFor={id}>{children}</label>
     &nbsp;
     <input id={id} type={type} value={value} onChange={onInputChange}></input>
   </div>
