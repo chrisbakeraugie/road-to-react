@@ -1,4 +1,4 @@
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
 import React from 'react';
 
@@ -49,7 +49,12 @@ const App = () => {
 
       <h1>Hacker Stories</h1>
 
-      <Search onSearch={handleSearch} searchTerm={searchTerm} />
+      <InputWithLabel
+        id="search"
+        label="Search"
+        value={searchTerm}
+        onInputChange={handleSearch}
+      />
       <hr />
       <List list={searchedStories} />
     </div>
@@ -57,19 +62,16 @@ const App = () => {
 }
 
 
-const Search = ({ onSearch, searchTerm }) => (
+const InputWithLabel = ({ id, label, value, type = 'text', onInputChange }) => ( // We can give the default value for type, but it can still be changed from outside
   // <>
   // ... all the jsx here
   // </>
   // Fragments will work but they also ruin the formatting on 
   // VSCode, so for now I won't be using them
   <div>
-    <label htmlFor="search">Search:</label>
-    <input id="search" type="text" onChange={onSearch}></input>
-
-    <p>
-      Searching for <strong>{searchTerm}</strong>
-    </p>
+    <label htmlFor={id}>{label}</label>
+    &nbsp;
+    <input id={id} type={type} value={value} onChange={onInputChange}></input>
   </div>
 
 );
