@@ -57,19 +57,22 @@ const App = () => {
 }
 
 
-const Search = (props) => {
+const Search = ({ onSearch, searchTerm }) => (
+  // <>
+  // ... all the jsx here
+  // </>
+  // Fragments will work but they also ruin the formatting on 
+  // VSCode, so for now I won't be using them
+  <div>
+    <label htmlFor="search">Search:</label>
+    <input id="search" type="text" onChange={onSearch}></input>
 
-  return (
-    <div>
-      <label htmlFor="search">Search:</label>
-      <input id="search" type="text" onChange={props.onSearch}></input>
+    <p>
+      Searching for <strong>{searchTerm}</strong>
+    </p>
+  </div>
 
-      <p>
-        Searching for <strong>{props.searchTerm}</strong>
-      </p>
-    </div>
-  );
-};
+);
 
 
 const List = (props) =>
