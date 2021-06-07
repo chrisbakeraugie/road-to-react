@@ -2,23 +2,21 @@ import logo from './logo.svg';
 import './App.css';
 import React from 'react';
 
-const App = () => {
-  
-  //Custom hooks example - naming conventions for hooks; start with 'use'
-  const useSemiPersistentState = () => {
-    const [searchTerm, setSearchTerm] = React.useState(localStorage.getItem('search') || '');
+//Custom hooks example - naming conventions for hooks; start with 'use'
+const useSemiPersistentState = (key, initialState) => {
+  const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
 
-     /**
+  /**
    * This React Hook is basically saying that whenever, wherever, searchTerm is updated through
    * setSearchTerm, localStorage will always be in sync
    */
-    React.useEffect(() => {
-      localStorage.setItem('search', searchTerm);
-    }, [searchTerm]);
+  React.useEffect(() => {
+    localStorage.setItem(key, value);
+  }, [value, key]);
+  return [value, setValue];
+}
 
-    return[searchTerm, setSearchTerm];
-  }
-
+const App = () => {
 
   const stories = [
     {
@@ -35,7 +33,7 @@ const App = () => {
     }
   ];
 
-  const [searchTerm, setSearchTerm] = useSemiPersistentState();
+  const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
   const searchedStories = stories.filter((story) => {
     return story.title.toLowerCase().includes(searchTerm.toLowerCase());
