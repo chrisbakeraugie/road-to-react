@@ -1,6 +1,7 @@
 // import logo from './logo.svg';
 import './App.css';
 import React from 'react';
+import { resolve } from 'dns';
 
 //Custom hooks example - naming conventions for hooks; start with 'use'
 const useSemiPersistentState = (key, initialState) => {
@@ -31,12 +32,33 @@ const initialStories = [
   }
 ];
 
+/**
+ * This simulates fetching data from an API by creating a Promise
+ * with an intentionally delayed resolution to practice rendering 
+ * data asynchronously using React Hooks
+ */
+const getAsyncStories = () => (
+  // return (Promise.resolve({ data: { stories: initialStories } }));
+  new Promise(resolve => (
+    setTimeout(
+      () => resolve({ data: { stories: initialStories } })
+      , 2300)
+  ))
+);
+
 
 const App = () => {
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
-  const [stories, setStories] = React.useState(initialStories);
+  // Removed initialStories to 'simulate' an API call (see getSyncStories())
+  const [stories, setStories] = React.useState([]);
+
+  React.useEffect(() => {
+    getAsyncStories().then(result => {
+      setStories(result.data.stories);
+    })
+  })
 
   const handleRemoveStory = item => {
     const newStories = stories.filter(
