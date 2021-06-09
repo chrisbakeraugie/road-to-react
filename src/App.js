@@ -16,24 +16,35 @@ const useSemiPersistentState = (key, initialState) => {
   return [value, setValue];
 }
 
+const initialStories = [
+  {
+    title: 'React',
+    url: 'https://reactjs.org/', author: 'Jordan Walke', num_comments: 3,
+    points: 4,
+    objectID: 0,
+  },
+  {
+    title: 'Redux',
+    url: 'https://redux.js.org/', author: 'Dan Abramov, Andrew Clark', num_comments: 2,
+    points: 5,
+    objectID: 1,
+  }
+];
+
+
 const App = () => {
 
-  const stories = [
-    {
-      title: 'React',
-      url: 'https://reactjs.org/', author: 'Jordan Walke', num_comments: 3,
-      points: 4,
-      objectID: 0,
-    },
-    {
-      title: 'Redux',
-      url: 'https://redux.js.org/', author: 'Dan Abramov, Andrew Clark', num_comments: 2,
-      points: 5,
-      objectID: 1,
-    }
-  ];
-
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
+
+  const [stories, setStories] = React.useState(initialStories);
+
+  const handleRemoveStory = item => {
+    const newStories = stories.filter(
+      story => item.objectID !== story.objectID
+    );
+
+    setStories(newStories);
+  }
 
   const searchedStories = stories.filter((story) => {
     return story.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -58,7 +69,7 @@ const App = () => {
         <strong>Search:</strong>
       </InputWithLabel>
       <hr />
-      <List list={searchedStories} />
+      <List list={searchedStories} onRemoveItem={handleRemoveStory} />
     </div>
   );
 }
@@ -71,7 +82,7 @@ const InputWithLabel = ({ id, value, type = 'text', isFocused, onInputChange, ch
 
   // Use a hook into the lifecycle to focus when the component renders
   React.useEffect(() => {
-    if (isFocused && inputRef.current){
+    if (isFocused && inputRef.current) {
       // Access the ref attribute and set the focus
       inputRef.current.focus();
     }
@@ -86,16 +97,41 @@ const InputWithLabel = ({ id, value, type = 'text', isFocused, onInputChange, ch
 };
 
 
-const List = (props) =>
-  props.list.map(item => (
-    <div key={item.objectID}>
-      <span>
-        <a href={item.url}>{item.title} </a>
-      </span>
-      <span>{item.author} </span>
-      <span>{item.num_comments}</span>
-      <span>{item.points}</span>
-    </div>
+const List = ({ list, onRemoveItem }) =>
+  list.map(item => (
+    <Item
+      key={item.objectID}
+      item={item}
+      onRemoveItem={onRemoveItem}
+    />
   ));
 
+const Item = ({ item, onRemoveItem }) => {
+  const handleRemoveItem = () => {
+    onRemoveItem(item);
+  }
+
+  return (
+    <div>
+      <span>
+        <a href={item.url}>{item.title}</a>
+      </span>
+      <span>{item.author}</span>
+      <span>{item.num_comments}</span>
+      <span>{item.points}</span>
+      <span>
+        {/* This first method of handler is recommended because: \
+          1. It is easier to read (method is above anyway)
+          2. It is easier to debug*/}
+        <button type="button" onClick={onRemoveItem.bind(null, item)}>Dismiss</button>
+        {/* This second method of handler is also acceptable, but is slightly harder to debug */}
+        <button type="button" onClick={() => onRemoveItem(item)}>Dismiss (inline)</button>
+        {/* This third method is never recommended */}
+        <button type="button" onClick={() => {
+          onRemoveItem(item);
+        }}>Dismiss (wholly defined inline)</button>
+      </span>
+    </div>
+  )
+}
 export default App;
