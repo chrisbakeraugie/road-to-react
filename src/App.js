@@ -46,26 +46,48 @@ const getAsyncStories = () => (
   ))
 );
 
+// Can be used to create more "declarative programming", instead of "imperative programming"
+const storiesReducer = (state, action) => {
+  if (action.type === 'SET_STORIES') {
+    return action.payload;
+  } else if (action.type === 'REMOVE_STORY') {
+    return (state.filter(story => (
+      action.payload.objectID !== story.objectID
+    )))
+  }
+  else {
+    throw new Error();
+  }
+}
 
 const App = () => {
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
-  // Removed initialStories to 'simulate' an API call (see getSyncStories())
-  const [stories, setStories] = React.useState([]);
+  // Replaced "useState" hook with a reducer, which can be used to handle more complicated state management
+  const [stories, dispatchStories] = React.useReducer(storiesReducer, []);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isError, setIsError] = React.useState(false); // Error handling if third party API errors
 
   React.useEffect(() => {
+    setIsLoading(true);
     getAsyncStories().then(result => {
-      setStories(result.data.stories);
-    })
-  })
+      dispatchStories({
+        type: 'SET_STORIES',
+        payload: result.data.stories
+      });
+      setIsLoading(false);
+    }).catch(() => {
+      setIsError(true);
+    });
+  }, [])
 
+  // Removed the "removeStory" logic from the handler to the reducer
   const handleRemoveStory = item => {
-    const newStories = stories.filter(
-      story => item.objectID !== story.objectID
-    );
-
-    setStories(newStories);
+    dispatchStories({
+      type: 'REMOVE_STORY',
+      payload: item
+    });
   }
 
   const searchedStories = stories.filter((story) => {
@@ -91,7 +113,13 @@ const App = () => {
         <strong>Search:</strong>
       </InputWithLabel>
       <hr />
-      <List list={searchedStories} onRemoveItem={handleRemoveStory} />
+
+      {isError && <p>Something went wrong...</p>}
+
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : <List list={searchedStories} onRemoveItem={handleRemoveStory} />
+      }
     </div>
   );
 }
