@@ -47,17 +47,48 @@ const getAsyncStories = () => (
 );
 
 // Can be used to create more "declarative programming", instead of "imperative programming"
+// It is now in control of more predictable state transitions, as they are all managed in one spot
 const storiesReducer = (state, action) => {
-  if (action.type === 'SET_STORIES') {
-    return action.payload;
-  } else if (action.type === 'REMOVE_STORY') {
-    return (state.filter(story => (
-      action.payload.objectID !== story.objectID
-    )))
+  switch (action.type) {
+    case 'STORIES_FETCH_INIT':
+      return {
+        ...state,
+        isLoading: true,
+        isError: false
+      };
+    case 'STORIES_FETCH_SUCCESS':
+      return {
+        ...state,
+        isLoading: false,
+        isError: false,
+        data: action.payload
+      };
+    case 'STORIES_FETCH_FAILURE':
+      return {
+        ...state,
+        isLoading: false,
+        isError: true
+      };
+    case 'REMOVE_STORY':
+      return {
+        ...state,
+        data: state.data.filter(story => (
+          action.payload.objectID !== story.objectID
+        ))
+      };
+    default: throw new Error();
+
   }
-  else {
-    throw new Error();
-  }
+  // if (action.type === 'SET_STORIES') {
+  //   return action.payload;
+  // } else if (action.type === 'REMOVE_STORY') {
+  //   return (state.filter(story => (
+  //     action.payload.objectID !== story.objectID
+  //   )))
+  // }
+  // else {
+  //   throw new Error();
+  // }
 }
 
 const App = () => {
@@ -65,21 +96,33 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
   // Replaced "useState" hook with a reducer, which can be used to handle more complicated state management
-  const [stories, dispatchStories] = React.useReducer(storiesReducer, []);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isError, setIsError] = React.useState(false); // Error handling if third party API errors
+  // Then, replaced the multiple state hooks with ONE, to help manage/prevent "Impossible States"
+  const [stories, dispatchStories] = React.useReducer(storiesReducer,
+    { data: [], isLoading: false, isError: false });
+  // const [isLoading, setIsLoading] = React.useState(false);
+  // const [isError, setIsError] = React.useState(false); // Error handling if third party API errors
 
   React.useEffect(() => {
-    setIsLoading(true);
+    dispatchStories({ type: 'STORIES_FETCH_INIT' });
+
     getAsyncStories().then(result => {
       dispatchStories({
-        type: 'SET_STORIES',
+        type: "STORIES_FETCH_SUCCESS",
         payload: result.data.stories
       });
-      setIsLoading(false);
     }).catch(() => {
-      setIsError(true);
-    });
+      dispatchStories({ type: 'STORIES_FETCH_FAILURE' });
+    })
+    // setIsLoading(true);
+    // getAsyncStories().then(result => {
+    //   dispatchStories({
+    //     type: 'SET_STORIES',
+    //     payload: result.data.stories
+    //   });
+    //   setIsLoading(false);
+    // }).catch(() => {
+    //   setIsError(true);
+    // });
   }, [])
 
   // Removed the "removeStory" logic from the handler to the reducer
@@ -90,7 +133,7 @@ const App = () => {
     });
   }
 
-  const searchedStories = stories.filter((story) => {
+  const searchedStories = stories.data.filter((story) => {
     return story.title.toLowerCase().includes(searchTerm.toLowerCase());
   })
 
@@ -114,9 +157,9 @@ const App = () => {
       </InputWithLabel>
       <hr />
 
-      {isError && <p>Something went wrong...</p>}
+      {stories.isError && <p>Something went wrong...</p>}
 
-      {isLoading ? (
+      {stories.isLoading ? (
         <p>Loading...</p>
       ) : <List list={searchedStories} onRemoveItem={handleRemoveStory} />
       }
