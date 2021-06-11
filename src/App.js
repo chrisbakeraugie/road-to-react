@@ -19,6 +19,8 @@ const useSemiPersistentState = (key, initialState) => {
   return [value, setValue];
 }
 
+
+
 // Can be used to create more "declarative programming", instead of "imperative programming"
 // It is now in control of more predictable state transitions, as they are all managed in one spot
 const storiesReducer = (state, action) => {
@@ -65,6 +67,16 @@ const App = () => {
   // const [isLoading, setIsLoading] = React.useState(false);
   // const [isError, setIsError] = React.useState(false); // Error handling if third party API errors
 
+  const [url, setUrl] = React.useState(`${API_ENDPOINT}${searchTerm}`);
+
+  const handleSearchInput = event => {
+    setSearchTerm(event.target.value);
+  }
+
+  const handleSearchSubmit = () => {
+    setUrl(`${API_ENDPOINT}${searchTerm}`)
+  }
+
   // Moved the fetching logic into a standalone function
   /**
    * This useCallback function is needed because it creates a memoized
@@ -73,20 +85,19 @@ const App = () => {
    * App component that is rendered
    */
   const handleFetchStories = React.useCallback(() => {
-    if (searchTerm === '') {
-      return
-    } else {
-      dispatchStories({ type: 'STORIES_FETCH_INIT' });
+    dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-      fetch(`${API_ENDPOINT}${searchTerm}`).then(res => { return (res.json()) })
-        .then(result => {
-          dispatchStories({
-            type: 'STORIES_FETCH_SUCCESS',
-            payload: result.hits
-          })
+    fetch(url).then(res => { return (res.json()) })
+      .then(result => {
+        dispatchStories({
+          type: 'STORIES_FETCH_SUCCESS',
+          payload: result.hits
         })
-    }
-  }, [searchTerm]);
+      }).catch(() => {
+        dispatchStories('STORIES_FETCH_FAILURE');
+      })
+
+  }, [url]);
 
   React.useEffect(() => {
     handleFetchStories()
@@ -118,10 +129,18 @@ const App = () => {
         id="search"
         value={searchTerm}
         isFocused
-        onInputChange={handleSearch}
+        onInputChange={handleSearchInput}
       >
         <strong>Search:</strong>
       </InputWithLabel>
+
+      <button
+        type="button"
+        disabled={!searchTerm}
+        onClick={handleSearchSubmit}>
+        Search
+      </button>
+
       <hr />
 
       {stories.isError && <p>Something went wrong...</p>}
