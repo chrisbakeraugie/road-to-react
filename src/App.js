@@ -19,35 +19,6 @@ const useSemiPersistentState = (key, initialState) => {
   return [value, setValue];
 }
 
-const initialStories = [
-  {
-    title: 'React',
-    url: 'https://reactjs.org/', author: 'Jordan Walke', num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: 'Redux',
-    url: 'https://redux.js.org/', author: 'Dan Abramov, Andrew Clark', num_comments: 2,
-    points: 5,
-    objectID: 1,
-  }
-];
-
-/**
- * This simulates fetching data from an API by creating a Promise
- * with an intentionally delayed resolution to practice rendering 
- * data asynchronously using React Hooks
- */
-const getAsyncStories = () => (
-  // return (Promise.resolve({ data: { stories: initialStories } }));
-  new Promise(resolve => (
-    setTimeout(
-      () => resolve({ data: { stories: initialStories } })
-      , 2300)
-  ))
-);
-
 // Can be used to create more "declarative programming", instead of "imperative programming"
 // It is now in control of more predictable state transitions, as they are all managed in one spot
 const storiesReducer = (state, action) => {
@@ -81,16 +52,6 @@ const storiesReducer = (state, action) => {
     default: throw new Error();
 
   }
-  // if (action.type === 'SET_STORIES') {
-  //   return action.payload;
-  // } else if (action.type === 'REMOVE_STORY') {
-  //   return (state.filter(story => (
-  //     action.payload.objectID !== story.objectID
-  //   )))
-  // }
-  // else {
-  //   throw new Error();
-  // }
 }
 
 const App = () => {
@@ -114,16 +75,6 @@ const App = () => {
         payload: result.hits
       })
     })
-    // setIsLoading(true);
-    // getAsyncStories().then(result => {
-    //   dispatchStories({
-    //     type: 'SET_STORIES',
-    //     payload: result.data.stories
-    //   });
-    //   setIsLoading(false);
-    // }).catch(() => {
-    //   setIsError(true);
-    // });
   }, [])
 
   // Removed the "removeStory" logic from the handler to the reducer
@@ -201,10 +152,6 @@ const List = ({ list, onRemoveItem }) =>
   ));
 
 const Item = ({ item, onRemoveItem }) => {
-  const handleRemoveItem = () => {
-    onRemoveItem(item);
-  }
-
   return (
     <div>
       <span>
