@@ -3,6 +3,8 @@ import './App.css';
 import React from 'react';
 import { resolve } from 'dns';
 
+const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
+
 //Custom hooks example - naming conventions for hooks; start with 'use'
 const useSemiPersistentState = (key, initialState) => {
   const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
@@ -105,13 +107,12 @@ const App = () => {
   React.useEffect(() => {
     dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-    getAsyncStories().then(result => {
+    fetch(`${API_ENDPOINT}react`).then(res => {return(res.json())})
+    .then(result => {
       dispatchStories({
-        type: "STORIES_FETCH_SUCCESS",
-        payload: result.data.stories
-      });
-    }).catch(() => {
-      dispatchStories({ type: 'STORIES_FETCH_FAILURE' });
+        type: 'STORIES_FETCH_SUCCESS',
+        payload: result.hits
+      })
     })
     // setIsLoading(true);
     // getAsyncStories().then(result => {
