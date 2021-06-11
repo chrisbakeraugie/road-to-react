@@ -65,17 +65,32 @@ const App = () => {
   // const [isLoading, setIsLoading] = React.useState(false);
   // const [isError, setIsError] = React.useState(false); // Error handling if third party API errors
 
-  React.useEffect(() => {
-    dispatchStories({ type: 'STORIES_FETCH_INIT' });
+  // Moved the fetching logic into a standalone function
+  /**
+   * This useCallback function is needed because it creates a memoized
+   * function every time the dependency array (searchTerm) is changed.
+   * Without it, a new handleFetchStories function would be created with each
+   * App component that is rendered
+   */
+  const handleFetchStories = React.useCallback(() => {
+    if (searchTerm === '') {
+      return
+    } else {
+      dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-    fetch(`${API_ENDPOINT}react`).then(res => {return(res.json())})
-    .then(result => {
-      dispatchStories({
-        type: 'STORIES_FETCH_SUCCESS',
-        payload: result.hits
-      })
-    })
-  }, [])
+      fetch(`${API_ENDPOINT}${searchTerm}`).then(res => { return (res.json()) })
+        .then(result => {
+          dispatchStories({
+            type: 'STORIES_FETCH_SUCCESS',
+            payload: result.hits
+          })
+        })
+    }
+  }, [searchTerm]);
+
+  React.useEffect(() => {
+    handleFetchStories()
+  }, [handleFetchStories])
 
   // Removed the "removeStory" logic from the handler to the reducer
   const handleRemoveStory = item => {
@@ -113,7 +128,7 @@ const App = () => {
 
       {stories.isLoading ? (
         <p>Loading...</p>
-      ) : <List list={searchedStories} onRemoveItem={handleRemoveStory} />
+      ) : <List list={stories.data} onRemoveItem={handleRemoveStory} /> // Changed data to list because it will be searching in the API, not on the client side
       }
     </div>
   );
