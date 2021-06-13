@@ -74,8 +74,13 @@ const App = () => {
     setSearchTerm(event.target.value);
   }
 
-  const handleSearchSubmit = () => {
+  const handleSearchSubmit = (event) => {
     setUrl(`${API_ENDPOINT}${searchTerm}`)
+
+    // It may appear like it works without this,
+    // but it causes a browser reload, which is against
+    // the point of using frameworks like React
+    event.preventDefault();
   }
 
   // Moved the fetching logic into a standalone function
@@ -90,7 +95,7 @@ const App = () => {
 
     try {
       const result = await axios.get(url);
-      
+
       dispatchStories({
         type: 'STORIES_FETCH_SUCCESS',
         payload: result.data.hits
@@ -126,21 +131,10 @@ const App = () => {
 
       <h1>Hacker Stories</h1>
 
-      <InputWithLabel
-        id="search"
-        value={searchTerm}
-        isFocused
-        onInputChange={handleSearchInput}
-      >
-        <strong>Search:</strong>
-      </InputWithLabel>
-
-      <button
-        type="button"
-        disabled={!searchTerm}
-        onClick={handleSearchSubmit}>
-        Search
-      </button>
+      <SearchForm
+        searchTerm={searchTerm}
+        onSearchInput={handleSearchInput}
+        onSearchSubmit={handleSearchSubmit} />
 
       <hr />
 
@@ -153,6 +147,30 @@ const App = () => {
     </div>
   );
 }
+
+
+const SearchForm = (({
+  searchTerm,
+  onSearchInput,
+  onSearchSubmit }) => {
+  return (
+    <form onSubmit={onSearchSubmit}>
+      <InputWithLabel
+        id="search"
+        value={searchTerm}
+        isFocused
+        onInputChange={onSearchInput}
+      >
+        <strong>Search:</strong>
+      </InputWithLabel>
+
+      <button
+        type="submit"
+        disabled={!searchTerm}>
+        Submit
+</button>
+    </form>)
+})
 
 // We can give the default value for type, but it can still be changed from outside
 const InputWithLabel = ({ id, value, type = 'text', isFocused, onInputChange, children }) => {
