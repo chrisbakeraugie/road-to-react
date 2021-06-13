@@ -2,6 +2,7 @@
 import './App.css';
 import React from 'react';
 import { resolve } from 'dns';
+import axios from 'axios';
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
@@ -87,11 +88,12 @@ const App = () => {
   const handleFetchStories = React.useCallback(() => {
     dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-    fetch(url).then(res => { return (res.json()) })
+    axios.get(url)
       .then(result => {
+        console.log(result);
         dispatchStories({
           type: 'STORIES_FETCH_SUCCESS',
-          payload: result.hits
+          payload: result.data.hits
         })
       }).catch(() => {
         dispatchStories('STORIES_FETCH_FAILURE');
