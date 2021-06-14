@@ -1,8 +1,9 @@
 // import logo from './logo.svg';
-import './App.css';
 import React from 'react';
 import { resolve } from 'dns';
 import axios from 'axios';
+
+import styles from './App.module.css';
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
@@ -128,22 +129,21 @@ const App = () => {
 
   return (
     <div className="App">
+      <div className={styles.container}>
+        <h1 className={styles.headlinePrimary}>Hacker Stories</h1>
 
-      <h1>Hacker Stories</h1>
+        <SearchForm
+          searchTerm={searchTerm}
+          onSearchInput={handleSearchInput}
+          onSearchSubmit={handleSearchSubmit} />
 
-      <SearchForm
-        searchTerm={searchTerm}
-        onSearchInput={handleSearchInput}
-        onSearchSubmit={handleSearchSubmit} />
+        {stories.isError && <p>Something went wrong...</p>}
 
-      <hr />
-
-      {stories.isError && <p>Something went wrong...</p>}
-
-      {stories.isLoading ? (
-        <p>Loading...</p>
-      ) : <List list={stories.data} onRemoveItem={handleRemoveStory} /> // Changed data to list because it will be searching in the API, not on the client side
-      }
+        {stories.isLoading ? (
+          <p>Loading...</p>
+        ) : <List list={stories.data} onRemoveItem={handleRemoveStory} /> // Changed data to list because it will be searching in the API, not on the client side
+        }
+      </div>
     </div>
   );
 }
@@ -154,7 +154,7 @@ const SearchForm = (({
   onSearchInput,
   onSearchSubmit }) => {
   return (
-    <form onSubmit={onSearchSubmit}>
+    <form onSubmit={onSearchSubmit} className={styles.SearchForm}>
       <InputWithLabel
         id="search"
         value={searchTerm}
@@ -206,24 +206,15 @@ const List = ({ list, onRemoveItem }) =>
 
 const Item = ({ item, onRemoveItem }) => {
   return (
-    <div>
-      <span>
+    <div className={styles.item}>
+      <span style={{width: '40%'}}>
         <a href={item.url}>{item.title}</a>
       </span>
-      <span>{item.author}</span>
-      <span>{item.num_comments}</span>
-      <span>{item.points}</span>
-      <span>
-        {/* This first method of handler is recommended because: \
-          1. It is easier to read (method is above anyway)
-          2. It is easier to debug*/}
-        <button type="button" onClick={onRemoveItem.bind(null, item)}>Dismiss</button>
-        {/* This second method of handler is also acceptable, but is slightly harder to debug */}
-        <button type="button" onClick={() => onRemoveItem(item)}>Dismiss (inline)</button>
-        {/* This third method is never recommended */}
-        <button type="button" onClick={() => {
-          onRemoveItem(item);
-        }}>Dismiss (wholly defined inline)</button>
+      <span  style={{ width: '30%' }}>{item.author}</span>
+      <span  style={{ width: '10%' }}>{item.num_comments}</span>
+      <span style={{ width: '10%' }}>{item.points}</span>
+      <span style={{ width: '10%' }}>
+        <button type="button" className={`${styles.button} ${styles.buttonLarge}`} onClick={onRemoveItem.bind(null, item)}>Dismiss</button>
       </span>
     </div>
   )
