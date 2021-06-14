@@ -89,3 +89,8 @@
 .buttonLarge {
   padding: 10px;
 }
+
+.button:hover > svg > path {
+  fill: blue;
+  stroke: blue;
+}
