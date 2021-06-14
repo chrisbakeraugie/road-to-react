@@ -18,6 +18,41 @@ font-size: 48px;
 font-weight: 300;
 letter-spacing: 2px;
 `;
+
+const StyledItem = styled.div`
+display: flex;
+align-items: center;
+padding-bottom: 5px;
+`;
+
+const StyledColumn = styled.span` padding: 0 5px;
+white-space: nowrap;
+overflow: hidden;
+white-space: nowrap; text-overflow: ellipsis;
+a{
+color: inherit;
+}
+width: ${props => props.width};
+`;
+
+const StyledButton = styled.button` background: transparent;
+border: 1px solid #171212; padding: 5px;
+  cursor: pointer;
+transition: all 0.1s ease-in;
+  &:hover {
+    background: #171212;
+    color: #ffffff;
+} `;
+
+const StyledButtonSmall = styled(StyledButton)` padding: 5px;
+`;
+const StyledButtonLarge = styled(StyledButton)` padding: 10px;
+`;
+const StyledSearchForm = styled.form` padding: 10px 0 20px 0;
+display: flex;
+align-items: baseline;
+`;
+
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
 //Custom hooks example - naming conventions for hooks; start with 'use'
@@ -142,8 +177,8 @@ const App = () => {
 
   return (
     <div className="App">
-      <StyledContainer className={styles.container}>
-        <StyledHeadlinePrimary className={styles.headlinePrimary}>Hacker Stories</StyledHeadlinePrimary>
+      <StyledContainer >
+        <StyledHeadlinePrimary>Hacker Stories</StyledHeadlinePrimary>
 
         <SearchForm
           searchTerm={searchTerm}
@@ -167,7 +202,7 @@ const SearchForm = (({
   onSearchInput,
   onSearchSubmit }) => {
   return (
-    <form onSubmit={onSearchSubmit} className={styles.SearchForm}>
+    <StyledSearchForm onSubmit={onSearchSubmit}>
       <InputWithLabel
         id="search"
         value={searchTerm}
@@ -177,12 +212,12 @@ const SearchForm = (({
         <strong>Search:</strong>
       </InputWithLabel>
 
-      <button
+      <StyledButtonLarge
         type="submit"
         disabled={!searchTerm}>
         Submit
-</button>
-    </form>)
+</StyledButtonLarge>
+    </StyledSearchForm>)
 })
 
 // We can give the default value for type, but it can still be changed from outside
@@ -219,17 +254,17 @@ const List = ({ list, onRemoveItem }) =>
 
 const Item = ({ item, onRemoveItem }) => {
   return (
-    <div className={styles.item}>
-      <span style={{ width: '40%' }}>
+    <StyledItem>
+      <StyledColumn style={{ width: '40%' }}>
         <a href={item.url}>{item.title}</a>
-      </span>
-      <span style={{ width: '30%' }}>{item.author}</span>
-      <span style={{ width: '10%' }}>{item.num_comments}</span>
-      <span style={{ width: '10%' }}>{item.points}</span>
-      <span style={{ width: '10%' }}>
-        <button type="button" className={`${styles.button} ${styles.buttonLarge}`} onClick={onRemoveItem.bind(null, item)}>Dismiss</button>
-      </span>
-    </div>
+      </StyledColumn>
+      <StyledColumn >{item.author}</StyledColumn>
+      <StyledColumn style={{ width: '10%' }}>{item.num_comments}</StyledColumn>
+      <StyledColumn style={{ width: '10%' }}>{item.points}</StyledColumn>
+      <StyledColumn style={{ width: '10%' }}>
+        <StyledButtonLarge type="button" onClick={onRemoveItem.bind(null, item)}>Dismiss</StyledButtonLarge>
+      </StyledColumn>
+    </StyledItem>
   )
 }
 export default App;
