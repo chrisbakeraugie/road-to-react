@@ -4,7 +4,20 @@ import { resolve } from 'dns';
 import axios from 'axios';
 
 import styles from './App.module.css';
+import styled from 'styled-components';
 
+const StyledContainer = styled.div`
+height: 100vw;
+padding: 20px;
+background: #83a4d4;
+background: linear-gradient(to left, #b6fbff, #83a4d4);
+color: #171212;
+`;
+const StyledHeadlinePrimary = styled.h1`
+font-size: 48px;
+font-weight: 300;
+letter-spacing: 2px;
+`;
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
 //Custom hooks example - naming conventions for hooks; start with 'use'
@@ -129,8 +142,8 @@ const App = () => {
 
   return (
     <div className="App">
-      <div className={styles.container}>
-        <h1 className={styles.headlinePrimary}>Hacker Stories</h1>
+      <StyledContainer className={styles.container}>
+        <StyledHeadlinePrimary className={styles.headlinePrimary}>Hacker Stories</StyledHeadlinePrimary>
 
         <SearchForm
           searchTerm={searchTerm}
@@ -143,7 +156,7 @@ const App = () => {
           <p>Loading...</p>
         ) : <List list={stories.data} onRemoveItem={handleRemoveStory} /> // Changed data to list because it will be searching in the API, not on the client side
         }
-      </div>
+      </StyledContainer>
     </div>
   );
 }
@@ -207,11 +220,11 @@ const List = ({ list, onRemoveItem }) =>
 const Item = ({ item, onRemoveItem }) => {
   return (
     <div className={styles.item}>
-      <span style={{width: '40%'}}>
+      <span style={{ width: '40%' }}>
         <a href={item.url}>{item.title}</a>
       </span>
-      <span  style={{ width: '30%' }}>{item.author}</span>
-      <span  style={{ width: '10%' }}>{item.num_comments}</span>
+      <span style={{ width: '30%' }}>{item.author}</span>
+      <span style={{ width: '10%' }}>{item.num_comments}</span>
       <span style={{ width: '10%' }}>{item.points}</span>
       <span style={{ width: '10%' }}>
         <button type="button" className={`${styles.button} ${styles.buttonLarge}`} onClick={onRemoveItem.bind(null, item)}>Dismiss</button>
