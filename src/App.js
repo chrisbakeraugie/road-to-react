@@ -1,9 +1,6 @@
-// import logo from './logo.svg';
 import React from 'react';
-import { resolve } from 'dns';
 import axios from 'axios';
 
-import styles from './App.module.css';
 import styled from 'styled-components';
 import { ReactComponent as Check } from './check.svg';
 
@@ -45,8 +42,8 @@ transition: all 0.1s ease-in;
     color: #ffffff;
 } `;
 
-const StyledButtonSmall = styled(StyledButton)` padding: 5px;
-`;
+// const StyledButtonSmall = styled(StyledButton)` padding: 5px;
+// `;
 const StyledButtonLarge = styled(StyledButton)` padding: 10px;
 `;
 const StyledSearchForm = styled.form` padding: 10px 0 20px 0;
@@ -58,6 +55,10 @@ const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
 //Custom hooks example - naming conventions for hooks; start with 'use'
 const useSemiPersistentState = (key, initialState) => {
+  // This initializes the isMounted with an initial value 'false'
+  // However, it doesn't get overwritten each time, for reasons that aren't 100% clear to me
+  // It can be used to prevent rendering the first time, and re-render every time after
+  const isMounted = React.useRef(false);
   const [value, setValue] = React.useState(localStorage.getItem(key) || initialState);
 
   /**
@@ -65,7 +66,12 @@ const useSemiPersistentState = (key, initialState) => {
    * setSearchTerm, localStorage will always be in sync
    */
   React.useEffect(() => {
-    localStorage.setItem(key, value);
+    // This is where that React.useRef (above) came in handy
+    if (!isMounted.current) {
+      isMounted.current = true;
+    } else {
+      localStorage.setItem(key, value);
+    }
   }, [value, key]);
   return [value, setValue];
 }
@@ -159,23 +165,18 @@ const App = () => {
     handleFetchStories()
   }, [handleFetchStories])
 
-  // Removed the "removeStory" logic from the handler to the reducer
-  const handleRemoveStory = item => {
+  /**
+   *useCallback will return a memoized version of the callback that only changes if
+   *one of the dependencies have changed
+   */
+  const handleRemoveStory = React.useCallback(item => {
     dispatchStories({
       type: 'REMOVE_STORY',
       payload: item
     });
-  }
+  }, []);
 
-  const searchedStories = stories.data.filter((story) => {
-    return story.title.toLowerCase().includes(searchTerm.toLowerCase());
-  })
-
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-    localStorage.setItem('search', event.target.value);
-  }
-
+  console.log("B: App");
   return (
     <div className="App">
       <StyledContainer >
@@ -243,15 +244,20 @@ const InputWithLabel = ({ id, value, type = 'text', isFocused, onInputChange, ch
 
 };
 
-
-const List = ({ list, onRemoveItem }) =>
+/**
+ * If your component renders the same result if given the same props,
+ * you can wrap it in React.memo for a performance boost.
+ * React will skip rendering the component and re-use the last rendered result
+ */
+const List = React.memo(({ list, onRemoveItem }) =>
+  console.log("B: List") || // This works because this is no a function body and the left hand side always evaluates to false
   list.map(item => (
     <Item
       key={item.objectID}
       item={item}
       onRemoveItem={onRemoveItem}
     />
-  ));
+  )));
 
 const Item = ({ item, onRemoveItem }) => {
   return (
