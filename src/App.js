@@ -304,3 +304,6 @@ const Item = ({ item, onRemoveItem }) => {
   )
 }
 export default App;
+
+// Must be exported so that they may be used with
+export { storiesReducer, SearchForm, InputWithLabel, List, Item };
