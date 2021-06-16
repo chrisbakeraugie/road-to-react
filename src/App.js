@@ -113,6 +113,22 @@ const storiesReducer = (state, action) => {
   }
 }
 
+/**
+ * While the function to count comments is outside the App component,
+ * because the function has all arguments passed to it, it will work.
+ * However, while it won't be re-created on each render, it WILL be ran
+ * on each render.
+ * @param {*} stories 
+ */
+const getSumComments = stories => {
+  console.log('C');
+
+  return stories.data.reduce(
+    (result, value) => result + value.num_comments, 0
+  );
+
+};
+
 const App = () => {
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
@@ -177,10 +193,21 @@ const App = () => {
   }, []);
 
   console.log("B: App");
+
+  /**
+   * The original function call would be run every time App (re)rendered. 
+   * If the summComments function was more calculation heavy, that could
+   * add up incredibly fast and even slow down the app noticeably. 
+   * By using the React.memo hook, we can tell React to only re run the function
+   * if the dependencies have changed (presented by the [stories] after the getSumComments(stories) call)
+   */
+  // const sumComments = getSumComments(stories);
+  const sumComments = React.useMemo(() => getSumComments(stories), [stories]);
+
   return (
     <div className="App">
       <StyledContainer >
-        <StyledHeadlinePrimary>Hacker Stories</StyledHeadlinePrimary>
+        <StyledHeadlinePrimary>Hacker Stories with {sumComments} comments</StyledHeadlinePrimary>
 
         <SearchForm
           searchTerm={searchTerm}
