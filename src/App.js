@@ -296,7 +296,7 @@ const Item = ({ item, onRemoveItem }) => {
       <StyledColumn style={{ width: '10%' }}>{item.num_comments}</StyledColumn>
       <StyledColumn style={{ width: '10%' }}>{item.points}</StyledColumn>
       <StyledColumn style={{ width: '10%' }}>
-        <StyledButtonLarge type="button" onClick={onRemoveItem.bind(null, item)}>
+        <StyledButtonLarge type="button" onClick={() => onRemoveItem(item)}>
           <Check height="18px" width="18px" />
         </StyledButtonLarge>
       </StyledColumn>
