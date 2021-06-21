@@ -200,4 +200,4 @@ const App = () => {
 export default App;
 
 // Must be exported so that they may be used with testing
-export { storiesReducer, SearchForm, InputWithLabel, List, Item };
+export { storiesReducer, SearchForm, InputWithLabel, List };

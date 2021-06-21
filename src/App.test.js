@@ -1,6 +1,8 @@
 // create-react-app includes these necessary functions for component testing
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import App, { storiesReducer, Item, List, SearchForm, InputWithLabel } from './App';
+import App, { storiesReducer, SearchForm, InputWithLabel } from './App';
+import Item from './List';
+import List from './List';
 import { expression } from '@babel/template';
 import { notDeepStrictEqual } from 'assert';
 import axios from 'axios';

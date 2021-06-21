@@ -22,7 +22,7 @@ align-items: center;
 padding-bottom: 5px;
 `;
 
-const StyledColumn = styled.span` padding: 0 5px;
+const span = styled.span` padding: 0 5px;
 white-space: nowrap;
 overflow: hidden;
 white-space: nowrap; text-overflow: ellipsis;
@@ -38,31 +38,42 @@ width: ${props => props.width};
  * React will skip rendering the component and re-use the last rendered result
  */
 const List = React.memo(({ list, onRemoveItem }) =>
-  console.log("B: List") || // This works because this is no a function body and the left hand side always evaluates to false
-  list.map(item => (
-    <Item
-      key={item.objectID}
-      item={item}
-      onRemoveItem={onRemoveItem}
-    />
-  )));
+  // console.log("B: List") || // This works because this is no a function body and the left hand side always evaluates to false
+  <div>
+    <div style={{ display: 'flex' }}>
+      <span style={{ width: '40%' }}>Title</span>
+      <span style={{ width: '30%' }}>Author</span>
+      <span style={{ width: '10%' }}>Comments</span>
+      <span style={{ width: '10%' }}>Points</span>
+      <span style={{ width: '10%' }}>Actions</span>
+    </div>
+
+    {list.map(item => (
+      <Item
+        key={item.objectID}
+        item={item}
+        onRemoveItem={onRemoveItem}
+      />
+    ))}
+  </div>
+);
 
 const Item = ({ item, onRemoveItem }) => {
   return (
-    <StyledItem>
-      <StyledColumn style={{ width: '40%' }}>
+    <div style={{ display: 'flex' }}>
+      <span style={{ width: '40%' }}>
         <a href={item.url}>{item.title}</a>
-      </StyledColumn>
-      <StyledColumn >{item.author}</StyledColumn>
-      <StyledColumn style={{ width: '10%' }}>{item.num_comments}</StyledColumn>
-      <StyledColumn style={{ width: '10%' }}>{item.points}</StyledColumn>
-      <StyledColumn style={{ width: '10%' }}>
+      </span>
+      <span style={{ width: '30%' }} >{item.author}</span>
+      <span style={{ width: '10%' }}>{item.num_comments}</span>
+      <span style={{ width: '10%' }}>{item.points}</span>
+      <span style={{ width: '10%' }}>
         <StyledButtonLarge type="button" onClick={() => onRemoveItem(item)}>
           Dismiss
         </StyledButtonLarge>
-      </StyledColumn>
-    </StyledItem>
+      </span>
+    </div>
   )
 }
 
-export { List, Item };
+export default List;
