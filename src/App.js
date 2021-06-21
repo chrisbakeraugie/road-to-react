@@ -3,6 +3,11 @@ import axios from 'axios';
 
 import styled from 'styled-components';
 import { ReactComponent as Check } from './check.svg';
+import SearchForm from './SearchForm';
+import InputWithLabel from './InputWithLabel';
+import List from './List';
+
+
 
 const StyledContainer = styled.div`
 height: 100vw;
@@ -17,39 +22,6 @@ font-weight: 300;
 letter-spacing: 2px;
 `;
 
-const StyledItem = styled.div`
-display: flex;
-align-items: center;
-padding-bottom: 5px;
-`;
-
-const StyledColumn = styled.span` padding: 0 5px;
-white-space: nowrap;
-overflow: hidden;
-white-space: nowrap; text-overflow: ellipsis;
-a{
-color: inherit;
-}
-width: ${props => props.width};
-`;
-
-const StyledButton = styled.button` background: transparent;
-border: 1px solid #171212; padding: 5px;
-  cursor: pointer;
-transition: all 0.1s ease-in;
-  &:hover {
-    background: #171212;
-    color: #ffffff;
-} `;
-
-// const StyledButtonSmall = styled(StyledButton)` padding: 5px;
-// `;
-const StyledButtonLarge = styled(StyledButton)` padding: 10px;
-`;
-const StyledSearchForm = styled.form` padding: 10px 0 20px 0;
-display: flex;
-align-items: baseline;
-`;
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
@@ -225,85 +197,7 @@ const App = () => {
   );
 }
 
-
-const SearchForm = (({
-  searchTerm,
-  onSearchInput,
-  onSearchSubmit }) => {
-  return (
-    <StyledSearchForm onSubmit={onSearchSubmit}>
-      <InputWithLabel
-        id="search"
-        value={searchTerm}
-        isFocused
-        onInputChange={onSearchInput}
-      >
-        <strong>Search:</strong>
-      </InputWithLabel>
-
-      <StyledButtonLarge
-        type="submit"
-        disabled={!searchTerm}>
-        Submit
-</StyledButtonLarge>
-    </StyledSearchForm>)
-})
-
-// We can give the default value for type, but it can still be changed from outside
-const InputWithLabel = ({ id, value, type = 'text', isFocused, onInputChange, children }) => {
-  // Create a 'ref' with React's "useRef" hook
-  // This is a persistent value over the lifecycle of a React component.
-  const inputRef = React.useRef();
-
-  // Use a hook into the lifecycle to focus when the component renders
-  React.useEffect(() => {
-    if (isFocused && inputRef.current) {
-      // Access the ref attribute and set the focus
-      inputRef.current.focus();
-    }
-  }, [isFocused])
-  return (<div>
-    <label htmlFor={id}>{children}</label>
-    &nbsp;
-    {/* JSX-reserved 'ref' attribute will get the inputRef value */}
-    <input ref={inputRef} id={id} type={type} value={value} onChange={onInputChange} autoFocus={isFocused}></input>
-  </div>)
-
-};
-
-/**
- * If your component renders the same result if given the same props,
- * you can wrap it in React.memo for a performance boost.
- * React will skip rendering the component and re-use the last rendered result
- */
-const List = React.memo(({ list, onRemoveItem }) =>
-  console.log("B: List") || // This works because this is no a function body and the left hand side always evaluates to false
-  list.map(item => (
-    <Item
-      key={item.objectID}
-      item={item}
-      onRemoveItem={onRemoveItem}
-    />
-  )));
-
-const Item = ({ item, onRemoveItem }) => {
-  return (
-    <StyledItem>
-      <StyledColumn style={{ width: '40%' }}>
-        <a href={item.url}>{item.title}</a>
-      </StyledColumn>
-      <StyledColumn >{item.author}</StyledColumn>
-      <StyledColumn style={{ width: '10%' }}>{item.num_comments}</StyledColumn>
-      <StyledColumn style={{ width: '10%' }}>{item.points}</StyledColumn>
-      <StyledColumn style={{ width: '10%' }}>
-        <StyledButtonLarge type="button" onClick={() => onRemoveItem(item)}>
-          Dismiss
-        </StyledButtonLarge>
-      </StyledColumn>
-    </StyledItem>
-  )
-}
 export default App;
 
-// Must be exported so that they may be used with
+// Must be exported so that they may be used with testing
 export { storiesReducer, SearchForm, InputWithLabel, List, Item };
