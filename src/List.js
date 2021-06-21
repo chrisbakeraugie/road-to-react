@@ -41,7 +41,10 @@ width: ${props => props.width};
 const List = React.memo(({ list, onRemoveItem }) => {
   // console.log("B: List") || // This works because this is no a function body and the left hand side always evaluates to false
 
-  const [sort, setSort] = React.useState('NONE');
+  const [sort, setSort] = React.useState({
+    sortKey: 'NONE',
+    isReverse: false
+  });
 
   // Object that stores the return function for each sort type
   const SORTS = {
@@ -54,13 +57,16 @@ const List = React.memo(({ list, onRemoveItem }) => {
 
   // Changes state for the new sort type
   const handleSort = sortKey => {
-    setSort(sortKey);
+    const isReverse = sort.sortKey === sortKey && !sort.isReverse;
+    setSort({ sortKey: sortKey, isReverse: isReverse });
   };
 
   // Stores the returned function from the SORTS object
-  const sortFunction = SORTS[sort];
+  const sortFunction = SORTS[sort.sortKey];
   // Stores sorted list returned from above function
-  const sortedList = sortFunction(list);
+  const sortedList = sort.isReverse ?
+    sortFunction(list).reverse() :
+    sortFunction(list);
 
   return (
     <div>
