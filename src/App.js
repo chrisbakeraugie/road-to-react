@@ -2,12 +2,10 @@ import React from 'react';
 import axios from 'axios';
 
 import styled from 'styled-components';
-import { ReactComponent as Check } from './check.svg';
+// import { ReactComponent as Check } from './check.svg';
 import SearchForm from './SearchForm';
 import InputWithLabel from './InputWithLabel';
 import List from './List';
-
-
 
 const StyledContainer = styled.div`
 height: 100vw;
