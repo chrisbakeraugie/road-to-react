@@ -18,8 +18,8 @@ describe('something truthy and falsy', () => {
   test('false to be false', () => {
     // expect(false).toBe(false);
     expect(false).toBeFalsy();
-  })
-})
+  });
+});
 
 describe('App component', () => {
   test('removes an item when clicking the Dismiss button', () => {
@@ -147,6 +147,17 @@ describe('SearchForm', () => {
 
     expect(searchFormProps.onSearchSubmit).toHaveBeenCalledTimes(1);
   })
+
+  // ---------------------- SNAPSHOT TESTING ---------------------- //
+
+  /**
+   * Snapshots will inform you if the HTML/DOM has changed unintentionally. 
+   * If the changes are intentional, you can confirm this and create a new snapshot
+   */
+  test('renders snapshot', () => {
+    const { container } = render(<SearchForm {...searchFormProps} />);
+    expect(container.firstChild).toMatchSnapshot();
+  });
 });
 
 // ---------------------- INTEGRATION TESTING: COMPONENTS ---------------------- //
@@ -273,7 +284,7 @@ describe('App', () => {
     // User interaction --> Search
     fireEvent.change(screen.queryByDisplayValue('React'), {
       target: {
-        value:'JavaScript'
+        value: 'JavaScript'
       }
     });
 
