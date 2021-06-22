@@ -23,6 +23,8 @@ letter-spacing: 2px;
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
+const getUrl = searchTerm => `${API_ENDPOINT}${searchTerm}`;
+
 //Custom hooks example - naming conventions for hooks; start with 'use'
 const useSemiPersistentState = (key, initialState) => {
   // This initializes the isMounted with an initial value 'false'
@@ -96,8 +98,51 @@ const getSumComments = stories => {
   return stories.data.reduce(
     (result, value) => result + value.num_comments, 0
   );
-
 };
+
+/**
+ * Starts with an empty array as its 'result'
+ * Every extracted searchTerm is compared to the one before
+ * If they are different searchTerms, concat the result (as before)
+ * If they are the same, just return un-edited
+ * @param {*} urls 
+ */
+const getLastSearches = urls => {
+  return (
+    urls.reduce((result, url, index) => {
+      const searchTerm = extractSearchTerm(url);
+
+      if (index === 0) {
+        return result.concat(searchTerm);
+      }
+
+      const previousSearchTerm = result[result.length - 1];
+
+      if (searchTerm === previousSearchTerm) {
+        return result;
+      } else {
+        return result.concat(searchTerm);
+      }
+    }, []))
+    .slice(-6)
+    .slice(0, -1);
+};
+
+const extractSearchTerm = url => url.replace(API_ENDPOINT, '');
+
+const LastSearches = ({ lastSearches, onLastSearch }) => (
+  <div>
+    {lastSearches.map((searchTerm, index) =>
+      <button
+        key={searchTerm + index}
+        type="button"
+        onClick={() => onLastSearch(searchTerm)}
+      >
+        {searchTerm}
+      </button>
+    )}
+  </div>
+)
 
 const App = () => {
 
@@ -107,17 +152,18 @@ const App = () => {
   // Then, replaced the multiple state hooks with ONE, to help manage/prevent "Impossible States"
   const [stories, dispatchStories] = React.useReducer(storiesReducer,
     { data: [], isLoading: false, isError: false });
-  // const [isLoading, setIsLoading] = React.useState(false);
-  // const [isError, setIsError] = React.useState(false); // Error handling if third party API errors
 
-  const [url, setUrl] = React.useState(`${API_ENDPOINT}${searchTerm}`);
+  /**
+   * Changed state to an array to store past searches
+   */
+  const [urls, setUrls] = React.useState([getUrl(searchTerm)]);
 
   const handleSearchInput = event => {
     setSearchTerm(event.target.value);
   }
 
   const handleSearchSubmit = (event) => {
-    setUrl(`${API_ENDPOINT}${searchTerm}`)
+    handleSearch(searchTerm);
 
     // It may appear like it works without this,
     // but it causes a browser reload, which is against
@@ -136,7 +182,8 @@ const App = () => {
     dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
     try {
-      const result = await axios.get(url);
+      const lastUrl = urls[urls.length - 1];
+      const result = await axios.get(lastUrl);
 
       dispatchStories({
         type: 'STORIES_FETCH_SUCCESS',
@@ -145,7 +192,7 @@ const App = () => {
     } catch {
       dispatchStories({ type: 'STORIES_FETCH_FAILURE' });
     }
-  }, [url]);
+  }, [urls]);
 
   React.useEffect(() => {
     handleFetchStories()
@@ -161,6 +208,19 @@ const App = () => {
       payload: item
     });
   }, []);
+
+
+  const handleLastSearch = searchTerm => {
+    setSearchTerm(searchTerm);
+    handleSearch(searchTerm);
+  };
+
+  const handleSearch = searchTerm => {
+    const url = getUrl(searchTerm);
+    setUrls(urls.concat(url));
+  }
+
+  const lastSearches = getLastSearches(urls);
 
   console.log("B: App");
 
@@ -183,6 +243,11 @@ const App = () => {
           searchTerm={searchTerm}
           onSearchInput={handleSearchInput}
           onSearchSubmit={handleSearchSubmit} />
+
+        <LastSearches
+          lastSearches={lastSearches}
+          onLastSearch={handleLastSearch}
+        />
 
         {stories.isError && <p>Something went wrong...</p>}
 
