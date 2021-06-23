@@ -21,9 +21,14 @@ letter-spacing: 2px;
 `;
 
 
-const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
+const API_BASE = 'https://hn.algolia.com/api/v1';
+const API_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
+const PARAM_PAGE = 'page='
 
-const getUrl = searchTerm => `${API_ENDPOINT}${searchTerm}`;
+const getUrl = (searchTerm, page) => {
+  return (`${API_BASE}${API_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`);
+}
 
 //Custom hooks example - naming conventions for hooks; start with 'use'
 const useSemiPersistentState = (key, initialState) => {
@@ -65,7 +70,10 @@ const storiesReducer = (state, action) => {
         ...state,
         isLoading: false,
         isError: false,
-        data: action.payload
+        data: action.payload.page === 0 ?
+          action.payload.list :
+          state.data.concat(action.payload.list),
+        page: action.payload.page
       };
     case 'STORIES_FETCH_FAILURE':
       return {
@@ -93,7 +101,7 @@ const storiesReducer = (state, action) => {
  * @param {*} stories 
  */
 const getSumComments = stories => {
-  console.log('C');
+  // console.log('C');
 
   return stories.data.reduce(
     (result, value) => result + value.num_comments, 0
@@ -128,7 +136,7 @@ const getLastSearches = urls => {
     .slice(0, -1);
 };
 
-const extractSearchTerm = url => url.replace(API_ENDPOINT, '');
+const extractSearchTerm = url => url.substring(url.lastIndexOf('?') + 1, url.lastIndexOf('&')).replace(PARAM_SEARCH, '');
 
 const LastSearches = ({ lastSearches, onLastSearch }) => (
   <div>
@@ -151,19 +159,19 @@ const App = () => {
   // Replaced "useState" hook with a reducer, which can be used to handle more complicated state management
   // Then, replaced the multiple state hooks with ONE, to help manage/prevent "Impossible States"
   const [stories, dispatchStories] = React.useReducer(storiesReducer,
-    { data: [], isLoading: false, isError: false });
+    { data: [], page: 0, isLoading: false, isError: false });
 
   /**
    * Changed state to an array to store past searches
    */
-  const [urls, setUrls] = React.useState([getUrl(searchTerm)]);
+  const [urls, setUrls] = React.useState([getUrl(searchTerm, 0)]);
 
   const handleSearchInput = event => {
     setSearchTerm(event.target.value);
   }
 
   const handleSearchSubmit = (event) => {
-    handleSearch(searchTerm);
+    handleSearch(searchTerm, 0);
 
     // It may appear like it works without this,
     // but it causes a browser reload, which is against
@@ -184,10 +192,12 @@ const App = () => {
     try {
       const lastUrl = urls[urls.length - 1];
       const result = await axios.get(lastUrl);
-
       dispatchStories({
         type: 'STORIES_FETCH_SUCCESS',
-        payload: result.data.hits
+        payload: {
+          list: result.data.hits,
+          page: result.data.page
+        }
       })
     } catch {
       dispatchStories({ type: 'STORIES_FETCH_FAILURE' });
@@ -212,17 +222,18 @@ const App = () => {
 
   const handleLastSearch = searchTerm => {
     setSearchTerm(searchTerm);
-    handleSearch(searchTerm);
+    handleSearch(searchTerm, 0);
   };
 
-  const handleSearch = searchTerm => {
-    const url = getUrl(searchTerm);
+  const handleSearch = (searchTerm, page) => {
+    const url = getUrl(searchTerm, page);
+    console.log(url);
     setUrls(urls.concat(url));
   }
 
   const lastSearches = getLastSearches(urls);
 
-  console.log("B: App");
+  // console.log("B: App");
 
   /**
    * The original function call would be run every time App (re)rendered. 
@@ -233,6 +244,12 @@ const App = () => {
    */
   // const sumComments = getSumComments(stories);
   const sumComments = React.useMemo(() => getSumComments(stories), [stories]);
+
+  const handleMore = () => {
+    const lastUrl = urls[urls.length - 1];
+    const searchTerm = extractSearchTerm(lastUrl);
+    handleSearch(searchTerm, stories.page + 1);
+  }
 
   return (
     <div className="App">
@@ -251,10 +268,15 @@ const App = () => {
 
         {stories.isError && <p>Something went wrong...</p>}
 
+        <List list={stories.data} onRemoveItem={handleRemoveStory} />
         {stories.isLoading ? (
           <p>Loading...</p>
-        ) : <List list={stories.data} onRemoveItem={handleRemoveStory} /> // Changed data to list because it will be searching in the API, not on the client side
+        ) : <button
+          type='button'
+          onClick={handleMore}
+        >Load More...</button>
         }
+
       </StyledContainer>
     </div>
   );
